@@ -1,20 +1,19 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
 [functions]
   node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "20"
-  
-[build]
-  publish = "."
-  functions = "netlify/functions"
 
-# Redireciona /api/chat para a Netlify Function
 [[redirects]]
   from = "/api/chat"
   to = "/.netlify/functions/chat"
   status = 200
+  force = true
 
-# Garante que o SPA não quebre em refreshes
 [[redirects]]
   from = "/*"
   to = "/index.html"
