@@ -17,8 +17,8 @@ A chave da API do Gemini **nunca fica no frontend**. Ela é armazenada como vari
 git init
 git add .
 git commit -m "first commit"
-git remote add origin https://github.com/SEU-USER/virei-a-chave.git
-git push -u origin main
+git remote add origin https://github.com/cabralduu/vireiachave.git
+git push -u origin master
 ```
 
 ### 2. Crie o site no Netlify
