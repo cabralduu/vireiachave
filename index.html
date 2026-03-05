@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Virei a Chave – PMSP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0e1a;
+    --blue: #1a2d5a;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --gold: #ffd700;
+    --green: #00ff9d;
+    --red: #ff4757;
+    --surface: #111827;
+    --surface2: #1f2937;
+    --border: rgba(0,212,255,0.15);
+    --text: #e8edf5;
+    --muted: #6b7280;
+    --radius: 16px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCREENS */
+  .screen { display:none; flex-direction:column; min-height:100vh; animation: fadeIn .4s ease; }
+  .screen.active { display:flex; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ===== SPLASH ===== */
+  #splash {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #1a2d5a 0%, var(--navy) 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  #splash::before {
+    content:'';
+    position:absolute;
+    width:400px; height:400px;
+    background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+    top:-100px; left:50%; transform:translateX(-50%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.5;transform:translateX(-50%) scale(1)} 50%{opacity:1;transform:translateX(-50%) scale(1.1)} }
+
+  .splash-content { text-align:center; z-index:1; padding:40px 32px; }
+  .key-icon {
+    width:80px; height:80px;
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    border-radius:24px;
+    margin:0 auto 28px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px;
+    box-shadow: 0 0 40px rgba(0,212,255,0.3), 0 0 80px rgba(0,212,255,0.1);
+    animation: glow 3s ease-in-out infinite;
+  }
+  @keyframes glow { 0%,100%{box-shadow:0 0 40px rgba(0,212,255,0.3),0 0 80px rgba(0,212,255,0.1)} 50%{box-shadow:0 0 60px rgba(0,212,255,0.5),0 0 120px rgba(0,212,255,0.2)} }
+
+  .splash-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .splash-sub {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .splash-desc {
+    font-size: 15px;
+    color: #9ca3af;
+    line-height: 1.6;
+    max-width: 300px;
+    margin: 0 auto 40px;
+  }
+
+  .btn-primary {
+    display:block; width:100%;
+    padding:16px;
+    background: linear-gradient(135deg, var(--accent), #0088cc);
+    color: var(--navy);
+    font-family: 'Syne', sans-serif;
+    font-size:16px; font-weight:700;
+    border:none; border-radius:14px;
+    cursor:pointer;
+    letter-spacing:.5px;
+    box-shadow: 0 4px 24px rgba(0,212,255,0.3);
+    transition: all .2s;
+  }
+  .btn-primary:active { transform:scale(.97); }
+
+  .btn-secondary {
+    display:block; width:100%;
+    padding:14px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size:15px; font-weight:600;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    cursor:pointer;
+    margin-top:12px;
+    transition: all .2s;
+  }
+  .btn-secondary:active { background: rgba(0,212,255,0.05); }
+
+  /* ===== HEADER ===== */
+  .app-header {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,14,26,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky; top:0; z-index:100;
+  }
+  .back-btn {
+    width:38px; height:38px;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px; color:var(--text);
+    flex-shrink:0;
+  }
+  .header-info { flex:1; }
+  .header-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+  .header-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+  .header-badge {
+    padding:4px 10px;
+    background: rgba(0,212,255,0.1);
+    border:1px solid rgba(0,212,255,0.3);
+    border-radius:20px;
+    font-size:11px; color:var(--accent);
+    font-weight:600;
+  }
+
+  /* ===== IPHEX FORM ===== */
+  #iphex-screen { background: var(--navy); }
+  .form-body { flex:1; overflow-y:auto; padding:20px; }
+
+  .progress-bar {
+    height:3px;
+    background: var(--surface2);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .progress-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius:2px;
+    transition: width .4s ease;
+  }
+
+  .step-indicator {
+    padding:12px 20px 0;
+    display:flex; gap:6px; align-items:center;
+  }
+  .step-dot {
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--surface2);
+    transition: all .3s;
+  }
+  .step-dot.done { background: var(--accent); }
+  .step-dot.active { background: var(--accent2); width:18px; border-radius:3px; }
+
+  .question-card {
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:28px 20px 24px;
+    margin-bottom:20px;
+  }
+  .q-text {
+    font-family:'Syne',sans-serif;
+    font-size:19px;
+    font-weight:700;
+    line-height:1.45;
+    margin-bottom:24px;
+  }
+
+  /* Scale 1-5 pure — zero labels */
+  .scale5-pure {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .scale5-pure-btn {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--surface2);
+    border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .scale5-pure-btn:active { transform: scale(.9); }
+  .scale5-pure-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--navy);
+    box-shadow: 0 0 16px rgba(0,212,255,0.4);
+  }
+
+  .q-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px; font-weight: 800;
+    color: rgba(0,212,255,0.12);
+    line-height: 1;
+    margin-bottom: 12px;
+    letter-spacing: -2px;
+  }
+  .scale-pole-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .scale-pole-labels span {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .5px;
+  }
+
+  .nav-btns { display:flex; gap:10px; margin-top:8px; }
+  .nav-btns .btn-primary, .nav-btns .btn-secondary { flex:1; margin:0; padding:14px; font-size:14px; }
+
+  /* ===== RESULTADO IPHEX ===== */
+  #result-screen { background: var(--navy); }
+  .result-body { flex:1; overflow-y:auto; padding:20px; }
+
+  .result-hero {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(0,212,255,0.05) 100%);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .result-score-ring {
+    width:100px; height:100px;
+    margin:0 auto 16px;
+    position:relative;
+  }
+  .score-svg { width:100%; height:100%; transform:rotate(-90deg); }
+  .score-bg { fill:none; stroke:var(--surface2); stroke-width:8; }
+  .score-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+  .score-center {
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+  }
+  .score-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+  .score-label { font-size:10px; color:var(--muted); }
+
+  .result-title { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:6px; }
+  .result-desc { font-size:14px; color:#9ca3af; line-height:1.6; }
+
+  .constructs-grid { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
+  .construct-card {
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+  }
+  .construct-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .construct-name { font-size:14px; font-weight:500; }
+  .construct-badge {
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:11px; font-weight:700;
+    font-family:'Syne',sans-serif;
+  }
+  .badge-elevado { background:rgba(0,255,157,0.15); color:var(--green); border:1px solid rgba(0,255,157,0.3); }
+  .badge-bom { background:rgba(0,212,255,0.15); color:var(--accent); border:1px solid rgba(0,212,255,0.3); }
+  .badge-adequado { background:rgba(255,215,0,0.15); color:var(--gold); border:1px solid rgba(255,215,0,0.3); }
+  .badge-diminuido { background:rgba(255,107,53,0.15); color:var(--accent2); border:1px solid rgba(255,107,53,0.3); }
+  .badge-ausente { background:rgba(255,71,87,0.15); color:var(--red); border:1px solid rgba(255,71,87,0.3); }
+
+  .construct-bar { height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+  .construct-bar-fill { height:100%; border-radius:2px; transition:width 1s ease .2s; }
+
+  .section-title {
+    font-family:'Syne',sans-serif;
+    font-size:13px; font-weight:700;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+
+  .alert-card {
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:12px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .alert-card.warning { background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.25); }
+  .alert-card.danger { background:rgba(255,71,87,0.08); border:1px solid rgba(255,71,87,0.25); }
+  .alert-card.ok { background:rgba(0,255,157,0.08); border:1px solid rgba(0,255,157,0.25); }
+  .alert-icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+  .alert-text { font-size:13px; line-height:1.5; }
+  .alert-title { font-weight:600; margin-bottom:3px; }
+
+  /* ===== CHAT ===== */
+  #chat-screen {
+    background: var(--navy);
+    position:relative;
+  }
+  .chat-messages {
+    flex:1;
+    overflow-y: auto;
+    padding: 16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding-bottom: 140px;
+  }
+
+  .msg {
+    display:flex;
+    gap:10px;
+    animation: msgIn .3s ease;
+  }
+  @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .msg.user { flex-direction:row-reverse; }
+
+  .msg-avatar {
+    width:34px; height:34px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    background: var(--surface2);
+    border:1px solid var(--border);
+  }
+  .msg.assistant .msg-avatar { background:linear-gradient(135deg,#0a2240,#1a4080); border-color:rgba(0,212,255,0.3); }
+
+  .msg-bubble {
+    max-width: 82%;
+    padding:12px 14px;
+    border-radius:16px;
+    font-size:14px;
+    line-height:1.6;
+  }
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, var(--accent), #0088cc);
+    color: var(--navy);
+    font-weight:500;
+    border-radius:16px 4px 16px 16px;
+  }
+  .msg.assistant .msg-bubble {
+    background: var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:4px 16px 16px 16px;
+  }
+
+  .msg-time { font-size:10px; color:var(--muted); margin-top:4px; text-align:right; }
+  .msg.assistant .msg-time { text-align:left; }
+
+  .typing-indicator { display:flex; gap:4px; padding:4px 0; }
+  .typing-dot {
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--muted);
+    animation: typingBounce 1.2s ease infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay:.2s; }
+  .typing-dot:nth-child(3) { animation-delay:.4s; }
+  @keyframes typingBounce { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-4px);opacity:1} }
+
+  /* Quick replies */
+  .quick-replies {
+    display:flex; gap:8px; flex-wrap:wrap;
+    padding:0 16px 12px;
+  }
+  .quick-btn {
+    padding:8px 14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    font-size:13px;
+    color:var(--text);
+    cursor:pointer;
+    transition:all .2s;
+    white-space:nowrap;
+  }
+  .quick-btn:active { background:rgba(0,212,255,0.1); border-color:var(--accent); }
+
+  /* Chat input area */
+  .chat-input-area {
+    position:fixed; bottom:0; left:0; right:0;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    padding:12px 16px 24px;
+    z-index:100;
+  }
+  .input-row {
+    display:flex; gap:10px; align-items:flex-end;
+  }
+  .chat-textarea {
+    flex:1;
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    padding:12px 14px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:15px;
+    resize:none;
+    max-height:100px;
+    min-height:48px;
+    outline:none;
+    line-height:1.4;
+    transition:border-color .2s;
+  }
+  .chat-textarea:focus { border-color:rgba(0,212,255,0.4); }
+  .chat-textarea::placeholder { color:var(--muted); }
+
+  .send-btn {
+    width:48px; height:48px;
+    background:linear-gradient(135deg,var(--accent),#0088cc);
+    border:none; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:20px;
+    flex-shrink:0;
+    box-shadow:0 4px 16px rgba(0,212,255,0.3);
+    transition:all .2s;
+  }
+  .send-btn:active { transform:scale(.93); }
+
+  .voice-btn {
+    width:48px; height:48px;
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:20px;
+    flex-shrink:0;
+    transition:all .2s;
+  }
+  .voice-btn.recording {
+    background:rgba(255,71,87,0.15);
+    border-color:var(--red);
+    animation:recordPulse .8s ease infinite;
+  }
+  @keyframes recordPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,0.4)} 50%{box-shadow:0 0 0 8px rgba(255,71,87,0)} }
+
+  /* chat profile mini */
+  .profile-strip {
+    display:flex; gap:8px; overflow-x:auto; padding:10px 16px 0;
+    scrollbar-width:none;
+  }
+  .profile-strip::-webkit-scrollbar { display:none; }
+  .profile-chip {
+    display:flex; align-items:center; gap:6px;
+    padding:6px 10px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    white-space:nowrap;
+    font-size:12px;
+  }
+  .profile-chip-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+  /* ===== LOADING ===== */
+  .loading-overlay {
+    position:fixed; inset:0;
+    background:rgba(10,14,26,0.85);
+    backdrop-filter:blur(8px);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    z-index:999;
+    gap:16px;
+  }
+  .loading-overlay.hidden { display:none; }
+  .loader {
+    width:48px; height:48px;
+    border:3px solid var(--surface2);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; color:var(--muted); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width:0; }
+
+  /* ONBOARDING */
+  .onboard-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    margin:0 20px 16px;
+  }
+  .onboard-step-icon { font-size:36px; margin-bottom:12px; }
+  .onboard-step-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:8px; }
+  .onboard-step-desc { font-size:14px; color:#9ca3af; line-height:1.6; }
+
+  /* TABS RESULT */
+  .tabs { display:flex; gap:4px; margin-bottom:20px; }
+  .tab {
+    flex:1; padding:10px 0;
+    background:var(--surface2);
+    border:1px solid transparent;
+    border-radius:10px;
+    text-align:center;
+    font-size:12px; font-weight:600;
+    font-family:'Syne',sans-serif;
+    color:var(--muted);
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .tab.active { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.3); color:var(--accent); }
+
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* Eligibility result */
+  .eligibility-card {
+    border-radius:20px;
+    padding:24px;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .eligibility-card.apto { background:linear-gradient(135deg,rgba(0,255,157,0.08),rgba(0,212,255,0.05)); border:1px solid rgba(0,255,157,0.25); }
+  .eligibility-card.inapto { background:linear-gradient(135deg,rgba(255,71,87,0.1),rgba(255,107,53,0.05)); border:1px solid rgba(255,71,87,0.25); }
+  .eligibility-card.atencao { background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,107,53,0.05)); border:1px solid rgba(255,215,0,0.25); }
+  .eligibility-icon { font-size:48px; margin-bottom:12px; }
+  .eligibility-status { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:8px; }
+  .eligibility-desc { font-size:14px; color:#9ca3af; line-height:1.6; }
+  .eligibility-card.apto .eligibility-status { color:var(--green); }
+  .eligibility-card.inapto .eligibility-status { color:var(--red); }
+  .eligibility-card.atencao .eligibility-status { color:var(--gold); }
+
+  /* voice wave anim */
+  .voice-wave {
+    display:flex; gap:3px; align-items:center; height:20px;
+    padding:0 8px;
+  }
+  .wave-bar {
+    width:3px; border-radius:2px;
+    background:var(--red);
+    animation:waveAnim .6s ease infinite;
+  }
+  .wave-bar:nth-child(1){height:6px;animation-delay:0s}
+  .wave-bar:nth-child(2){height:14px;animation-delay:.1s}
+  .wave-bar:nth-child(3){height:10px;animation-delay:.2s}
+  .wave-bar:nth-child(4){height:18px;animation-delay:.1s}
+  .wave-bar:nth-child(5){height:8px;animation-delay:.3s}
+  @keyframes waveAnim { 0%,100%{transform:scaleY(.5);opacity:.5} 50%{transform:scaleY(1);opacity:1} }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loading-text" id="loadingText">Analisando perfil...</div>
+</div>
+
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="splash-content">
+    <div class="key-icon">🗝️</div>
+    <div class="splash-sub">Concurso PMSP 2024</div>
+    <div class="splash-title">Virei a<br>Chave</div>
+    <p class="splash-desc">Simulação do perfil psicológico para o concurso da Polícia Militar de São Paulo — baseado no edital oficial.</p>
+    <button class="btn-primary" onclick="startIphex()">Iniciar Avaliação</button>
+    <button class="btn-secondary" onclick="showInfo()">Como funciona?</button>
+  </div>
+</div>
+
+<!-- IPHEX FORM -->
+<div class="screen" id="iphex-screen">
+  <div class="app-header">
+    <div class="back-btn" onclick="goBack('splash')">←</div>
+    <div class="header-info">
+      <div class="header-title">IPHEX Rápido</div>
+      <div class="header-sub" id="qProgressText">Pergunta 1 de 20</div>
+    </div>
+    <div class="header-badge" id="iphexBadge">Perfil</div>
+  </div>
+
+  <div class="step-indicator" id="stepIndicator"></div>
+  <div class="progress-bar" style="margin:10px 20px;">
+    <div class="progress-fill" id="progressFill" style="width:5%"></div>
+  </div>
+
+  <div class="form-body" id="formBody"></div>
+</div>
+
+<!-- RESULTADO -->
+<div class="screen" id="result-screen">
+  <div class="app-header">
+    <div class="back-btn" onclick="goBack('iphex-screen')">←</div>
+    <div class="header-info">
+      <div class="header-title">Seu Perfil</div>
+      <div class="header-sub">Análise PMSP — Edital 2024</div>
+    </div>
+    <div class="header-badge">Resultado</div>
+  </div>
+
+  <div class="result-body">
+    <div id="eligibilityCard" class="eligibility-card"></div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('perfil')">Perfil</div>
+      <div class="tab" onclick="switchTab('contra')">Contra</div>
+      <div class="tab" onclick="switchTab('complementar')">Complem.</div>
+    </div>
+
+    <div id="tab-perfil" class="tab-panel active">
+      <div class="section-title">Perfil Psicológico</div>
+      <div class="constructs-grid" id="perfilGrid"></div>
+    </div>
+    <div id="tab-contra" class="tab-panel">
+      <div class="section-title">Contra Perfil</div>
+      <div class="constructs-grid" id="contraGrid"></div>
+    </div>
+    <div id="tab-complementar" class="tab-panel">
+      <div class="section-title">Critério Complementar</div>
+      <div class="constructs-grid" id="complementarGrid"></div>
+      <div style="margin-top:20px;">
+        <div class="section-title">Observações</div>
+        <div id="alertsContainer"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:8px; padding-bottom:20px;">
+      <button class="btn-primary" onclick="goToChat()">🧠 Falar com a IA Psicóloga</button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Esta simulação não substitui a avaliação oficial do concurso</p>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="screen" id="chat-screen">
+  <div class="app-header">
+    <div class="back-btn" onclick="goBack('result-screen')">←</div>
+    <div class="header-info">
+      <div class="header-title">Dra. Clara</div>
+      <div class="header-sub">IA Psicóloga • Online agora</div>
+    </div>
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></div>
+  </div>
+
+  <div class="profile-strip" id="profileStrip"></div>
+
+  <div class="chat-messages" id="chatMessages"></div>
+
+  <div class="quick-replies" id="quickReplies"></div>
+
+  <div class="chat-input-area">
+    <div class="input-row">
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
+      <textarea class="chat-textarea" id="chatInput" placeholder="Digite sua mensagem..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== DATA ===================
+// Perguntas originais do IPHEX-A — exatamente como no instrumento real
+const IPHEX_QUESTIONS = [
+  { id:1,  construct:"inteligencia",               invert:false, text:"Costumo ter novas ideias." },
+  { id:2,  construct:"controleEmocional",          invert:false, text:"Sou paciente." },
+  { id:3,  construct:"conscienciosidade",          invert:false, text:"Sou organizado(a)." },
+  { id:4,  construct:"ansiedade",                  invert:true,  text:"Perco o sono quando sei que algo importante vai acontecer na minha vida." },
+  { id:5,  construct:"relacionamento",             invert:true,  text:"Sou tímido(a)." },
+  { id:6,  construct:"flexibilidade",              invert:false, text:"Mantenho-me informado(a) dos acontecimentos ao redor do mundo." },
+  { id:7,  construct:"vulnerabilidade",            invert:true,  text:"Tenho dificuldades para perdoar as pessoas que me fizeram algum mal." },
+  { id:8,  construct:"atencaoConcentrada",         invert:false, text:"Preocupo-me excessivamente com os detalhes." },
+  { id:9,  construct:"vulnerabilidade",            invert:true,  text:"Preciso do apoio dos meus amigos para superar as minhas dificuldades." },
+  { id:10, construct:"relacionamento",             invert:false, text:"Gosto de \"jogar conversa fora\" com as pessoas." },
+  { id:11, construct:"proatividade",               invert:false, text:"Sou melhor do que a maioria das pessoas que conheço." },
+  { id:12, construct:"flexibilidade",              invert:true,  text:"Prefiro o \"normal\" ao \"estranho\"." },
+  { id:13, construct:"canalizacaoAgressividade",   invert:true,  text:"Costumo manter uma postura crítica com as pessoas." },
+  { id:14, construct:"impulsividade",              invert:true,  text:"Geralmente sou movido(a) pelos meus impulsos ao tomar uma decisão." },
+  { id:15, construct:"controleEmocional",          invert:false, text:"Geralmente fico emocionado(a) ao ver alguém chorando." },
+  { id:16, construct:"proatividade",               invert:false, text:"Sinto-me alegre na maioria dos dias." },
+  { id:17, construct:"relacionamento",             invert:true,  text:"Posso fingir gostar de alguém caso eu precise de alguma coisa." },
+  { id:18, construct:"inteligencia",               invert:false, text:"Sou criativo(a)." },
+  { id:19, construct:"controleEmocional",          invert:false, text:"Sou calmo(a)." },
+  { id:20, construct:"conscienciosidade",          invert:false, text:"Mantenho minha casa sempre organizada." },
+  { id:21, construct:"ansiedade",                  invert:true,  text:"Sou bastante preocupado(a)." },
+  { id:22, construct:"relacionamento",             invert:false, text:"Tenho facilidade para falar em público." },
+  { id:23, construct:"flexibilidade",              invert:false, text:"Interesso-me pela história de outros países e culturas." },
+  { id:24, construct:"vulnerabilidade",            invert:true,  text:"Quando alguém me magoa, tenho dificuldades para esquecer." },
+  { id:25, construct:"conscienciosidade",          invert:false, text:"Sempre analiso meu trabalho com rigor para procurar falhas." },
+  { id:26, construct:"vulnerabilidade",            invert:true,  text:"Para resolver meus problemas, sinto a necessidade de receber apoio emocional." },
+  { id:27, construct:"relacionamento",             invert:false, text:"Costumo frequentar lugares que tenham muitas pessoas para conversar." },
+  { id:28, construct:"proatividade",               invert:false, text:"Mereço ser mais bem tratado(a) que as outras pessoas." },
+  { id:29, construct:"flexibilidade",              invert:false, text:"Meus ideais são conservadores." },
+  { id:30, construct:"canalizacaoAgressividade",   invert:false, text:"Evito criticar as pessoas quando elas se enganam." },
+  { id:31, construct:"impulsividade",              invert:true,  text:"Tendo a fazer o que vem à minha mente, sem considerar as consequências." },
+  { id:32, construct:"controleEmocional",          invert:false, text:"Sou uma pessoa sentimental." },
+  { id:33, construct:"proatividade",               invert:false, text:"Sinto-me com energia para fazer as coisas na maior parte do tempo." },
+  { id:34, construct:"relacionamento",             invert:false, text:"Se for do meu interesse, posso ser agradável com pessoas que não gosto." },
+  { id:35, construct:"inteligencia",               invert:false, text:"Minha imaginação é fértil." },
+  { id:36, construct:"canalizacaoAgressividade",   invert:false, text:"Mantenho a calma com facilidade se alguém me ofende." },
+  { id:37, construct:"conscienciosidade",          invert:true,  text:"Tenho facilidade para ficar em ambientes desorganizados." },
+  { id:38, construct:"ansiedade",                  invert:true,  text:"Costumo ficar ansioso(a) dias antes de um evento importante." },
+  { id:39, construct:"relacionamento",             invert:true,  text:"Acho desagradável falar em público." },
+  { id:40, construct:"flexibilidade",              invert:false, text:"Busco sempre estar por dentro das coisas que estão acontecendo ao meu redor." },
+  { id:41, construct:"vulnerabilidade",            invert:true,  text:"Costumo guardar mágoas quando me sinto traído(a) por alguém." },
+  { id:42, construct:"atencaoConcentrada",         invert:false, text:"Costumo me concentrar nos mínimos detalhes quando estou fazendo alguma coisa." },
+  { id:43, construct:"vulnerabilidade",            invert:true,  text:"Preciso de apoio emocional quando estou passando por dificuldades." },
+  { id:44, construct:"relacionamento",             invert:false, text:"Aproveito muito a companhia das outras pessoas." },
+  { id:45, construct:"proatividade",               invert:false, text:"Gosto de ser tratado(a) como uma pessoa superior às demais." },
+  { id:46, construct:"flexibilidade",              invert:false, text:"Tenho a mente aberta para mudar de opinião sobre as coisas." },
+  { id:47, construct:"canalizacaoAgressividade",   invert:false, text:"Geralmente sou tolerante com as falhas dos outros." },
+  { id:48, construct:"impulsividade",              invert:true,  text:"Costumo ser influenciado(a) por meus impulsos na hora de tomar decisões." },
+  { id:49, construct:"controleEmocional",          invert:false, text:"Raramente me sensibilizo diante de situações consideradas comoventes pela maioria das pessoas." },
+  { id:50, construct:"proatividade",               invert:false, text:"Sinto-me muito ativo(a) na maior parte do tempo." },
+  { id:51, construct:"relacionamento",             invert:false, text:"Dificilmente eu agradaria alguém apenas para alcançar meus interesses." },
+  { id:52, construct:"inteligencia",               invert:false, text:"Normalmente proponho soluções inovadoras para os problemas que me deparo." },
+  { id:53, construct:"canalizacaoAgressividade",   invert:true,  text:"Diante de insultos perco a paciência facilmente." },
+  { id:54, construct:"conscienciosidade",          invert:false, text:"Mesmo cansado(a) prefiro arrumar a casa ao invés de dormir com as coisas bagunçadas." },
+  { id:55, construct:"ansiedade",                  invert:true,  text:"Fico preocupado(a) quando estou esperando uma notícia importante." },
+  { id:56, construct:"relacionamento",             invert:false, text:"Estou quase sempre disposto(a) a ser o(a) primeiro(a) a falar quando estou em um grupo de pessoas." },
+  { id:57, construct:"flexibilidade",              invert:true,  text:"Tenho pouca curiosidade para me informar sobre os acontecimentos." },
+  { id:58, construct:"vulnerabilidade",            invert:true,  text:"É difícil perdoar quando alguém me faz mal." },
+  { id:59, construct:"conscienciosidade",          invert:false, text:"Prefiro revisar tudo que eu faço, mesmo que isso me atrase." },
+  { id:60, construct:"vulnerabilidade",            invert:true,  text:"Costumo compartilhar minhas dificuldades com meus amigos em busca de ajuda." },
+  { id:61, construct:"relacionamento",             invert:false, text:"Gosto de frequentar lugares com muita gente." },
+  { id:62, construct:"proatividade",               invert:false, text:"Por ser melhor que as outras pessoas, mereço ter mais privilégios que elas." },
+  { id:63, construct:"flexibilidade",              invert:true,  text:"As pessoas perdem o tempo delas quando tentam mudar minhas crenças." },
+  { id:64, construct:"canalizacaoAgressividade",   invert:true,  text:"Costumo apontar as falhas das pessoas." },
+  { id:65, construct:"impulsividade",              invert:false, text:"Normalmente as minhas decisões são tomadas depois de muita reflexão." },
+  { id:66, construct:"controleEmocional",          invert:true,  text:"Sou uma pessoa muito sensível." },
+  { id:67, construct:"proatividade",               invert:true,  text:"Frequentemente sinto como se eu não tivesse energia suficiente para fazer as coisas." },
+  { id:68, construct:"relacionamento",             invert:true,  text:"Trato bem as pessoas quando sei que precisarei delas." },
+  { id:69, construct:"inteligencia",               invert:false, text:"Tenho pouca criatividade." },
+  { id:70, construct:"canalizacaoAgressividade",   invert:true,  text:"Perco a calma com mais frequência que as outras pessoas." },
+  { id:71, construct:"conscienciosidade",          invert:true,  text:"Preciso melhorar minha organização." },
+  { id:72, construct:"ansiedade",                  invert:true,  text:"Fico ansioso(a) mesmo antes de saber o real tamanho do problema." },
+  { id:73, construct:"relacionamento",             invert:true,  text:"Sou envergonhado(a)." },
+  { id:74, construct:"flexibilidade",              invert:false, text:"Aprecio leituras que me façam conhecer sobre a política e a história de outros países." },
+  { id:75, construct:"vulnerabilidade",            invert:true,  text:"Tenho dificuldade para manter um relacionamento amigável com pessoas que já me magoaram." },
+  { id:76, construct:"atencaoConcentrada",         invert:false, text:"Às vezes sou tão detalhista que as pessoas não me compreendem." },
+  { id:77, construct:"vulnerabilidade",            invert:true,  text:"Quando estou em dificuldades, preciso de outra pessoa para me sentir melhor." },
+  { id:78, construct:"relacionamento",             invert:true,  text:"Costumo evitar ambientes com muitas pessoas." },
+  { id:79, construct:"proatividade",               invert:false, text:"Gosto de ser mais bem tratado(a) que os demais." },
+  { id:80, construct:"flexibilidade",              invert:false, text:"Sou uma pessoa conservadora no que diz respeito à religião." },
+  { id:81, construct:"canalizacaoAgressividade",   invert:true,  text:"Quando uma pessoa tem muitos defeitos, costumo apontá-los para ela." },
+  { id:82, construct:"impulsividade",              invert:false, text:"Na maioria das vezes, penso antes de agir." },
+  { id:83, construct:"controleEmocional",          invert:true,  text:"Às vezes acho que choro por qualquer coisa." },
+  { id:84, construct:"proatividade",               invert:false, text:"Costumo ser bem-humorado(a) e otimista." },
+  { id:85, construct:"relacionamento",             invert:true,  text:"Finjo gostar das pessoas que são úteis para mim." },
+];
+
+let currentQ = 0;
+let answers = {};
+let scores = {};
+let profileResult = {};
+let chatHistory = [];
+let isRecording = false;
+let recognition = null;
+
+// =================== NAVIGATION ===================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goBack(to) { showScreen(to); }
+
+function showInfo() {
+  alert("Este sistema simula os instrumentos psicológicos baseados no Edital PMSP 2024. Após responder o questionário IPHEX adaptado, a IA Psicóloga (Dra. Clara) aprofunda seu perfil em conversa personalizada.");
+}
+
+// =================== IPHEX ===================
+function startIphex() {
+  currentQ = 0;
+  answers = {};
+  showScreen('iphex-screen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = IPHEX_QUESTIONS[currentQ];
+  const total = IPHEX_QUESTIONS.length;
+  const pct = ((currentQ+1)/total*100).toFixed(0);
+
+  document.getElementById('qProgressText').textContent = `${currentQ+1} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('iphexBadge').textContent = q.id;
+
+  // step dots
+  let dots = '';
+  for(let i=0; i<total; i++){
+    if(i < currentQ) dots += `<div class="step-dot done"></div>`;
+    else if(i === currentQ) dots += `<div class="step-dot active"></div>`;
+    else dots += `<div class="step-dot"></div>`;
+  }
+  document.getElementById('stepIndicator').innerHTML = dots;
+
+  // pure 1-5 scale — ZERO labels, só números
+  let scaleHtml = `<div class="scale5-pure">`;
+  for(let v=1; v<=5; v++){
+    const sel = answers[q.id] === v;
+    scaleHtml += `<div class="scale5-pure-btn ${sel?'selected':''}" onclick="selectScale(${q.id},${v})">${v}</div>`;
+  }
+  scaleHtml += `</div>`;
+
+  const isLast = currentQ === total - 1;
+  document.getElementById('formBody').innerHTML = `
+    <div class="question-card">
+      <div class="q-num">${String(currentQ+1).padStart(2,'0')}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="scale-pole-labels">
+        <span>Discordo totalmente</span>
+        <span>Concordo totalmente</span>
+      </div>
+      ${scaleHtml}
+    </div>
+    <div class="nav-btns">
+      ${currentQ > 0 ? `<button class="btn-secondary" onclick="prevQ()">← Anterior</button>` : ''}
+      <button class="btn-primary" id="nextBtn" onclick="nextQ()" ${answers[q.id]===undefined?'style="opacity:.4;pointer-events:none"':''}>
+        ${isLast ? '✓ Ver Resultado' : 'Próxima →'}
+      </button>
+    </div>
+  `;
+}
+
+function selectScale(qid, val){
+  answers[qid] = val;
+  document.querySelectorAll('.scale5-pure-btn').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+  document.getElementById('nextBtn').style.opacity = '1';
+  document.getElementById('nextBtn').style.pointerEvents = 'auto';
+  // auto-advance after short delay
+  setTimeout(()=>{ if(answers[qid]) nextQ(); }, 350);
+}
+
+function nextQ(){
+  const q = IPHEX_QUESTIONS[currentQ];
+  if(answers[q.id] === undefined){ showToast('Selecione uma opção!'); return; }
+  if(currentQ < IPHEX_QUESTIONS.length - 1){
+    currentQ++;
+    renderQuestion();
+  } else {
+    computeScores();
+  }
+}
+function prevQ(){ if(currentQ > 0){ currentQ--; renderQuestion(); } }
+
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;font-weight:600;';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2000);
+}
+
+// =================== COMPUTE SCORES ===================
+function computeScores(){
+  showLoading('Computando perfil...');
+
+  const raw = {};
+  IPHEX_QUESTIONS.forEach(q => {
+    let val = answers[q.id] || 3; // 1-5
+    let norm = (val - 1) / 4; // 0-1
+    if(q.invert) norm = 1 - norm;
+    if(!raw[q.construct]) raw[q.construct] = [];
+    raw[q.construct].push(norm);
+  });
+
+  const avg = {};
+  Object.keys(raw).forEach(k => avg[k] = raw[k].reduce((a,b)=>a+b,0)/raw[k].length);
+
+  function classify(val, target, invert=false){
+    // target is the minimum needed level
+    if(val >= .85) return 'ELEVADO';
+    if(val >= .65) return 'BOM';
+    if(val >= .40) return 'ADEQUADO';
+    if(val >= .20) return 'DIMINUÍDO';
+    return 'AUSENTE';
+  }
+
+  // PERFIL PSICOLÓGICO
+  profileResult = {
+    perfil: {
+      flexibilidade: { label:'Flexibilidade de Conduta', val:avg.flexibilidade||.5, required:'BOM' },
+      relacionamento: { label:'Relacionamento Interpessoal', val:avg.relacionamento||.5, required:'BOM' },
+      proatividade: { label:'Grau de Proatividade / Iniciativa e Decisão', val:avg.proatividade||.5, required:'BOM' },
+      conscienciosidade: { label:'Conscienciosidade', val:avg.conscienciosidade||.5, required:'BOM' },
+      ansiedade: { label:'Ansiedade', val:avg.ansiedade||.5, required:'DIMINUÍDA' },
+      inteligencia: { label:'Inteligência', val:avg.inteligencia||.5, required:'ADEQUADA' },
+      vulnerabilidade: { label:'Vulnerabilidade', val:avg.vulnerabilidade||.5, required:'DIMINUÍDA' },
+    },
+    contra: {
+      impulsividade: { label:'Impulsividade', val:avg.impulsividade||.5, required:'DIMINUÍDA' },
+      controleEmocional: { label:'Controle Emocional', val:avg.controleEmocional||.5, required:'BOM' },
+      canalizacaoAgressividade: { label:'Controle e Canalização Produtiva da Agressividade', val:avg.canalizacaoAgressividade||.5, required:'BOM' },
+      dominioPsicomotor: { label:'Domínio Psicomotor', val:avg.dominioPsicomotor||.5, required:'BOM' },
+    },
+    complementar: {
+      atencaoConcentrada: { label:'Atenção Concentrada', val:avg.atencaoConcentrada||.5, required:'BOM' },
+      atencaoDifusa: { label:'Atenção Difusa', val:avg.atencaoDifusa||.5, required:'BOM' },
+      memoria: { label:'Memória', val:avg.memoria||.5, required:'ADEQUADA' },
+    }
+  };
+
+  // classify each
+  const levelOrder = ['AUSENTE','DIMINUÍDO','ADEQUADO','BOM','ELEVADO'];
+  function levelIndex(l){ return levelOrder.indexOf(l.replace('Ã','Ã').replace('ÍDA','ÍDO')); }
+
+  Object.keys(profileResult).forEach(group => {
+    Object.keys(profileResult[group]).forEach(key => {
+      const item = profileResult[group][key];
+      item.level = classify(item.val);
+      // check adequacy
+      const reqClean = item.required.replace('DA','DO').replace('DA','DO');
+      const reqMap = {'BOM':'BOM','ADEQUADA':'ADEQUADO','DIMINUÍDA':'DIMINUÍDO'};
+      const reqLevel = reqMap[item.required] || item.required;
+      item.reqLevel = reqLevel;
+      item.meets = levelIndex(item.level) >= levelIndex(reqLevel);
+    });
+  });
+
+  // Eligibility check
+  let perfilFails = Object.values(profileResult.perfil).filter(i=>!i.meets).length;
+  let contrFails = Object.values(profileResult.contra).filter(i=>!i.meets).length;
+  let complFails = Object.values(profileResult.complementar).filter(i=>!i.meets).length;
+
+  let eligible = 'APTO';
+  let eligReason = '';
+
+  if(perfilFails >= 2 || (perfilFails >= 1 && complFails >= 2)){
+    eligible = 'INAPTO';
+    eligReason = perfilFails >= 2 ? `${perfilFails} construtos do perfil psicológico abaixo do mínimo.` : 'Combinação de falhas no perfil e complementar.';
+  } else if(contrFails >= 2){
+    eligible = 'ATENÇÃO';
+    eligReason = 'Contra-perfil com construtos que podem indicar inaptidão após avaliação completa.';
+  } else if(perfilFails === 1 || complFails === 1 || contrFails === 1){
+    eligible = 'ATENÇÃO';
+    eligReason = 'Alguns construtos precisam de atenção e desenvolvimento.';
+  } else {
+    eligReason = 'Você demonstrou construtos compatíveis com o perfil exigido.';
+  }
+
+  profileResult.eligible = eligible;
+  profileResult.eligReason = eligReason;
+  profileResult.perfilFails = perfilFails;
+  profileResult.contrFails = contrFails;
+  profileResult.complFails = complFails;
+
+  setTimeout(()=>{ hideLoading(); renderResult(); }, 1500);
+}
+
+// =================== RENDER RESULT ===================
+function renderResult(){
+  const { eligible, eligReason } = profileResult;
+
+  const iconMap = { APTO:'✅', INAPTO:'⛔', ATENÇÃO:'⚠️' };
+  const classMap = { APTO:'apto', INAPTO:'inapto', ATENÇÃO:'atencao' };
+  document.getElementById('eligibilityCard').innerHTML = `
+    <div class="eligibility-icon">${iconMap[eligible]}</div>
+    <div class="eligibility-status">${eligible}</div>
+    <div class="eligibility-desc">${eligReason}</div>
+  `;
+  document.getElementById('eligibilityCard').className = `eligibility-card ${classMap[eligible]}`;
+
+  renderConstructGrid('perfilGrid', profileResult.perfil);
+  renderConstructGrid('contraGrid', profileResult.contra);
+  renderConstructGrid('complementarGrid', profileResult.complementar);
+
+  // alerts
+  let alertsHtml = '';
+  if(profileResult.perfilFails > 0){
+    alertsHtml += `<div class="alert-card danger"><div class="alert-icon">⚠️</div><div class="alert-text"><div class="alert-title">Perfil Psicológico</div>${profileResult.perfilFails} construto(s) abaixo do nível exigido pelo edital.</div></div>`;
+  }
+  if(profileResult.contrFails > 0){
+    alertsHtml += `<div class="alert-card warning"><div class="alert-icon">🔶</div><div class="alert-text"><div class="alert-title">Contra Perfil</div>${profileResult.contrFails} item(ns) do contra-perfil podem representar risco de inaptidão.</div></div>`;
+  }
+  if(profileResult.complFails > 0){
+    alertsHtml += `<div class="alert-card warning"><div class="alert-icon">📊</div><div class="alert-text"><div class="alert-title">Critério Complementar</div>${profileResult.complFails} item(ns) abaixo do esperado para o concurso.</div></div>`;
+  }
+  if(!alertsHtml) alertsHtml = `<div class="alert-card ok"><div class="alert-icon">✓</div><div class="alert-text"><div class="alert-title">Excelente!</div>Seu perfil está alinhado com todos os critérios do edital.</div></div>`;
+  document.getElementById('alertsContainer').innerHTML = alertsHtml;
+
+  showScreen('result-screen');
+}
+
+function renderConstructGrid(containerId, constructs){
+  const colorMap = { ELEVADO:'#00ff9d', BOM:'#00d4ff', ADEQUADO:'#ffd700', 'DIMINUÍDO':'#ff6b35', AUSENTE:'#ff4757' };
+  const badgeClass = { ELEVADO:'badge-elevado', BOM:'badge-bom', ADEQUADO:'badge-adequado', 'DIMINUÍDO':'badge-diminuido', AUSENTE:'badge-ausente' };
+  const widthMap = { ELEVADO:'96%', BOM:'75%', ADEQUADO:'55%', 'DIMINUÍDO':'30%', AUSENTE:'5%' };
+
+  let html = '';
+  Object.values(constructs).forEach(item => {
+    const icon = item.meets ? '✓' : '✗';
+    const iconColor = item.meets ? '#00ff9d' : '#ff4757';
+    html += `
+      <div class="construct-card">
+        <div class="construct-top">
+          <div class="construct-name">${item.label}</div>
+          <div class="construct-badge ${badgeClass[item.level]}">${item.level}</div>
+        </div>
+        <div class="construct-bar">
+          <div class="construct-bar-fill" style="width:${widthMap[item.level]};background:${colorMap[item.level]}"></div>
+        </div>
+        <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:var(--muted)">Mínimo: <strong style="color:var(--text)">${item.required}</strong></span>
+          <span style="font-size:12px;font-weight:700;color:${iconColor}">${icon} ${item.meets ? 'Atinge' : 'Não atinge'}</span>
+        </div>
+      </div>`;
+  });
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs = ['perfil','contra','complementar'];
+    t.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+// =================== CHAT ===================
+function goToChat(){
+  buildProfileStrip();
+  showScreen('chat-screen');
+  initChat();
+}
+
+function buildProfileStrip(){
+  const colors = { ELEVADO:'#00ff9d', BOM:'#00d4ff', ADEQUADO:'#ffd700', 'DIMINUÍDO':'#ff6b35', AUSENTE:'#ff4757' };
+  let chips = '';
+  [...Object.values(profileResult.perfil), ...Object.values(profileResult.contra)].forEach(item => {
+    chips += `<div class="profile-chip">
+      <div class="profile-chip-dot" style="background:${colors[item.level]}"></div>
+      <span>${item.label.split(' ')[0]} — ${item.level}</span>
+    </div>`;
+  });
+  document.getElementById('profileStrip').innerHTML = chips;
+}
+
+function initChat(){
+  chatHistory = [];
+  document.getElementById('chatMessages').innerHTML = '';
+
+  const fails = [];
+  [...Object.values(profileResult.perfil),...Object.values(profileResult.contra),...Object.values(profileResult.complementar)]
+    .filter(i=>!i.meets).forEach(i=>fails.push(i.label));
+
+  const highlights = [];
+  [...Object.values(profileResult.perfil),...Object.values(profileResult.contra),...Object.values(profileResult.complementar)]
+    .filter(i=>i.meets && (i.level==='BOM'||i.level==='ELEVADO')).forEach(i=>highlights.push(i.label));
+
+  const systemContext = buildSystemPrompt(fails, highlights);
+  chatHistory.push({role:'system', content: systemContext});
+
+  const greeting = buildGreeting(fails, highlights);
+  addMsg('assistant', greeting);
+
+  // quick replies
+  const qr = ['Me fale mais sobre o meu perfil', 'O que devo trabalhar?', 'Como melhorar a ansiedade?', 'Sou apto para o concurso?'];
+  renderQuickReplies(qr);
+}
+
+function buildSystemPrompt(fails, highlights){
+  const perfilStr = Object.values(profileResult.perfil).map(i=>`${i.label}: ${i.level} (Mínimo: ${i.required})`).join('\n');
+  const contraStr = Object.values(profileResult.contra).map(i=>`${i.label}: ${i.level} (Mínimo: ${i.required})`).join('\n');
+
+  return `Você é a Dra. Clara, psicóloga sênior especialista na banca da Polícia Militar de São Paulo (PMSP).
+Seu tom é PROFISSIONAL, CLÍNICO e ASSERTIVO. Você não é apenas uma assistente, você é a autoridade técnica.
+
+DIRETRIZES DE COMPORTAMENTO:
+1. FOCO NO EDITAL: Se o candidato falhou em "Controle Emocional" ou "Relacionamento Interpessoal", você deve explicar que isso é FATAL para o porte de arma e trabalho em equipe ostensivo.
+2. LINGUAGEM TÉCNICA: Use termos como "ajustamento psicossocial", "estabilidade conativa" e "produtividade sob pressão", mas explique o impacto disso na rua.
+3. SEM FALSAS PROMESSAS: Nunca diga "você vai passar". Diga "seu perfil atual apresenta riscos em X e Y que a banca costuma reprovar".
+4. DESAFIO: Se o candidato tentar minimizar uma falha (ex: "sou ansioso mas controlo"), confronte-o amigavelmente: "Na pressão da Escola de Soldados, essa ansiedade pode se transformar em paralisia ou reação impetuosa. Como você lida com frustração real?".
+
+DADOS ATUAIS DO CANDIDATO:
+Status: ${profileResult.eligible}
+Falhas Críticas: ${fails.join(', ') || 'Nenhuma registrada'}
+Destaques: ${highlights.join(', ') || 'Nenhum destaque elevado'}
+
+PERFIL DETALHADO:
+${perfilStr}
+${contraStr}
+
+ESTRUTURA DE RESPOSTA:
+- Comece validando o que ele disse.
+- Analise o construto psicológico específico do edital.
+- Termine com uma pergunta reflexiva que force o candidato a pensar como um Policial Militar.`;
+}
+
+function buildGreeting(fails, highlights){
+  const name_result = profileResult.eligible;
+  if(name_result === 'INAPTO'){
+    return `Olá! Sou a Dra. Clara. Analisei sua simulação e preciso ser direta com você: os resultados apontam para pontos significativos que exigem atenção imediata.\n\nIdentifiquei que ${fails.slice(0,2).join(' e ')} estão abaixo do mínimo exigido pelo edital. Isso não significa que a aprovação está descartada — esta é uma simulação — mas indica áreas prioritárias de desenvolvimento.\n\nVamos trabalhar juntos nesse perfil? Me conta: em quais dessas áreas você reconhece maior dificuldade no seu dia a dia?`;
+  } else if(name_result === 'ATENÇÃO'){
+    return `Olá! Sou a Dra. Clara. Seu perfil tem pontos positivos, mas também áreas que merecem atenção antes da avaliação oficial.\n\nSeus pontos fortes incluem ${highlights.slice(0,2).join(' e ')}. Por outro lado, ${fails.length > 0 ? fails[0] : 'alguns construtos'} precisam ser trabalhados.\n\nVamos aprofundar seu autoconhecimento sobre esses aspectos? Por onde você prefere começar?`;
+  } else {
+    return `Olá! Sou a Dra. Clara. Excelente notícia: sua simulação mostra um perfil bastante compatível com o exigido pelo edital PMSP.\n\nSeus destaques são ${highlights.slice(0,2).join(' e ')}, que são construtos essenciais para a função policial militar.\n\nMesmo com esse resultado positivo, podemos aprofundar seu autoconhecimento para garantir que você chegue preparado(a) à avaliação oficial. O que você gostaria de entender melhor sobre seu perfil?`;
+  }
+}
+
+function renderQuickReplies(options){
+  document.getElementById('quickReplies').innerHTML = options.map(o =>
+    `<div class="quick-btn" onclick="sendQuick('${o}')">${o}</div>`
+  ).join('');
+}
+
+function sendQuick(text){
+  document.getElementById('quickReplies').innerHTML = '';
+  sendMessageWithText(text);
+}
+
+async function sendMessage(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  input.style.height = '48px';
+  await sendMessageWithText(text);
+}
+
+async function sendMessageWithText(text){
+  document.getElementById('quickReplies').innerHTML = '';
+  addMsg('user', text);
+  
+  const typingId = 'typing-' + Date.now();
+  addTypingIndicator(typingId);
+
+  // 1. Pegamos o comportamento da Dra. Clara
+  const systemText = chatHistory.find(m => m.role === 'system')?.content || "";
+
+  // 2. Criamos o array de mensagens
+  let contents = [];
+
+  // 3. Verificamos se é o início da conversa
+  const hasHistory = chatHistory.filter(m => m.role !== 'system').length > 0;
+
+  if (!hasHistory) {
+    contents.push({
+      role: 'user',
+      parts: [{ text: `Aja estritamente conforme estas instruções: ${systemText}\n\nPergunta do candidato: ${text}` }]
+    });
+  } else {
+    contents = chatHistory
+      .filter(m => m.role !== 'system')
+      .slice(-10)
+      .map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+    contents.push({ role: 'user', parts: [{ text: text }] });
+  }
+
+  try {
+    // Chamada via proxy seguro — chave de API fica no servidor
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: contents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+        }
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      console.error("Erro da API:", data.error);
+      throw new Error(data.error.message);
+    }
+
+    const reply = data.candidates[0].content.parts[0].text;
+
+    removeTypingIndicator(typingId);
+    addMsg('assistant', reply);
+    
+    // Atualiza o histórico
+    chatHistory.push({role:'user', content: text});
+    chatHistory.push({role:'assistant', content: reply});
+
+    const qr = generateContextualReplies(text, reply);
+    renderQuickReplies(qr);
+
+  } catch(err) {
+    console.error("LOG FINAL DE ERRO:", err);
+    removeTypingIndicator(typingId);
+    addMsg('assistant', 'Dra. Clara: "Tive um problema na conexão técnica. Por favor, tente enviar novamente."');
+  }
+}
+
+function generateContextualReplies(userMsg, botReply){
+  const lower = userMsg.toLowerCase() + ' ' + botReply.toLowerCase();
+  if(lower.includes('ansied')) return ['Como controlar a ansiedade?', 'Técnicas de regulação emocional', 'Como isso afeta a avaliação?'];
+  if(lower.includes('impuls')) return ['Como controlar a impulsividade?', 'Exercícios práticos', 'Isso me reprova?'];
+  if(lower.includes('flexib')) return ['Exemplos de flexibilidade', 'Como desenvolver isso?', 'Exercícios práticos'];
+  if(lower.includes('memór')) return ['Técnicas de memorização', 'Como treinar atenção?', 'Quanto isso pesa?'];
+  return ['Quero ir mais fundo', 'Próximos passos', 'Mais sobre o edital'];
+}
+
+function addMsg(role, text){
+  const msgs = document.getElementById('chatMessages');
+  const time = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const avatar = role === 'assistant' ? '🧠' : '👤';
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${avatar}</div>
+    <div>
+      <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator(id){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.id = id;
+  div.innerHTML = `
+    <div class="msg-avatar">🧠</div>
+    <div>
+      <div class="msg-bubble">
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator(id){
+  const el = document.getElementById(id);
+  if(el) el.remove();
+}
+
+// =================== VOICE ===================
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    showToast('Voz não suportada neste dispositivo');
+    return;
+  }
+  if(isRecording){ stopRecording(); return; }
+  startRecording();
+}
+
+function startRecording(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'pt-BR';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = e => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('chatInput').value = transcript;
+    stopRecording();
+    sendMessage();
+  };
+  recognition.onerror = () => { stopRecording(); showToast('Erro no microfone'); };
+  recognition.onend = () => stopRecording();
+
+  recognition.start();
+  isRecording = true;
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.add('recording');
+  btn.innerHTML = `<div class="voice-wave"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div>`;
+}
+
+function stopRecording(){
+  if(recognition) recognition.stop();
+  isRecording = false;
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.remove('recording');
+  btn.innerHTML = '🎤';
+}
+
+// =================== UTILS ===================
+function autoResize(el){
+  el.style.height = '48px';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+function handleKey(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+}
+function showLoading(msg='Processando...'){
+  document.getElementById('loadingText').textContent = msg;
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+}
+function hideLoading(){
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+</script>
+</body>
+</html>
