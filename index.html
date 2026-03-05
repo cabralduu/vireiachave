@@ -1187,17 +1187,16 @@ async function sendMessageWithText(text){
 
   try {
     // Chamada via proxy seguro — chave de API fica no servidor
-    const response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1000,
-        }
-      })
-    });
+const messages = contents.map(c => ({
+  role: c.role === 'model' ? 'assistant' : c.role,
+  content: c.parts[0].text
+}));
+
+const response = await fetch('/.netlify/functions/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages })
+});
 
     const data = await response.json();
 
@@ -1206,7 +1205,7 @@ async function sendMessageWithText(text){
       throw new Error(data.error.message);
     }
 
-    const reply = data.candidates[0].content.parts[0].text;
+    const reply = data.choices[0].message.content;
 
     removeTypingIndicator(typingId);
     addMsg('assistant', reply);
