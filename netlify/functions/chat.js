@@ -1,9 +1,4 @@
-// netlify/functions/chat.js
-// Proxy seguro: a GEMINI_API_KEY fica nas variáveis de ambiente do Netlify,
-// nunca exposta no frontend.
-
-export async function handler(event) {
-  // Só aceita POST
+exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -12,13 +7,12 @@ export async function handler(event) {
   if (!API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'GEMINI_API_KEY não configurada nas variáveis de ambiente.' })
+      body: JSON.stringify({ error: 'GEMINI_API_KEY não configurada.' })
     };
   }
 
   try {
     const body = JSON.parse(event.body);
-
     const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
     const response = await fetch(geminiUrl, {
@@ -40,4 +34,4 @@ export async function handler(event) {
       body: JSON.stringify({ error: err.message })
     };
   }
-}
+};
