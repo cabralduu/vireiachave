@@ -1187,7 +1187,7 @@ async function sendMessageWithText(text){
 
   try {
     // Chamada via proxy seguro — chave de API fica no servidor
-    const response = await fetch('/api/chat', {
+    const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
